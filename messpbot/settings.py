@@ -27,7 +27,12 @@ import os
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['jinglin.scripts.mit.edu']
+ALLOWED_HOSTS = [
+    'yangilga.scripts.mit.edu',
+    'stelay.scripts.mit.edu',
+    'twang6.scripts.mit.edu',
+    'jinglin.scripts.mit.edu'
+]
 
 
 # Application definition
