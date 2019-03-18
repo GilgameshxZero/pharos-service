@@ -20,5 +20,4 @@ import messprint.views
 
 urlpatterns = [ 
    url(r'^admin/', admin.site.urls),
-   url('print/', messprint.views.first)
 ]
