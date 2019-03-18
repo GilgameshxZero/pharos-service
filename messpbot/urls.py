@@ -20,6 +20,9 @@ import messprint.views
 
 urlpatterns = [
    url(r'^admin/', admin.site.urls),
+<<<<<<< HEAD
    # url('print/', messprint.views.PrintView),
    url(r'^messprint/', include('messprint.urls')),
+=======
+>>>>>>> e1354a609f9ebcda4f6d25e80f8402fbbe42a024
 ]
