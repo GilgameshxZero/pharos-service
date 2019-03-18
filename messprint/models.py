@@ -18,3 +18,21 @@ class PrintJob(models.Model):
 	sided = models.CharField(max_length=1, choices=JOB_SIDED)
 	printer_type = models.CharField(max_length=1, choices=PRINTER_TYPE)
 	n_copies = models.IntegerField(default=0)
+
+USER_STATE = (
+	('P', 'PDF'),
+	('K', 'KERBEROS'),
+	('S', 'SIDED'),
+	('T', 'PRINTER_TYPE'),
+	('N', 'N_COPIES')
+)
+USER_STATE_RESPONSE = {
+	'K': 'What\' is your kerberos?',
+	'S': 'Do you want to print single or double sided?',
+	'T': 'Do you want to print bw or color?',
+	'N': 'How many copies do you want to print? Type a number.'
+}
+class PrintUserState(models.Model):
+	facebook_id = models.CharField(max_length=128, primary_key=True, unique=True)
+	state = models.CharField(max_length=1, choices=USER_STATE)
+
