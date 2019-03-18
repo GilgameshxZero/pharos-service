@@ -31,9 +31,12 @@ ALLOWED_HOSTS = [
     'yangilga.scripts.mit.edu',
     'stelay.scripts.mit.edu',
     'twang6.scripts.mit.edu',
-    'jinglin.scripts.mit.edu'
+    'jinglin.scripts.mit.edu',
+    '127.0.0.1',
+    'd0a69e39.ngrok.io'
 ]
 
+#EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44
 
 # Application definition
 
@@ -126,4 +129,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-
