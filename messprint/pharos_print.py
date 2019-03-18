@@ -1,6 +1,6 @@
-from subprocess import PIPE, Popen
-
 import requests
+
+from subprocess import PIPE, Popen
 
 def print_file_from_url(file_url,
                         kerberos,
