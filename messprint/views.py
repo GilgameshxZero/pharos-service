@@ -41,7 +41,7 @@ class PrintView(generic.View):
 	#     return HttpResponse()
 
 	def _handle_pdf(self, sender_id, message_data):
-		if message_data['attachments']['type'] != 'file':
+		if message_data['attachments'][0]['type'] != 'file':
 			return 'Sorry. We only support printing files. :/'
 
 		sender_state_exists = PrintUserState.objects.filter(facebook_id = sender_id).exists()
@@ -50,7 +50,7 @@ class PrintView(generic.View):
 			sender_state.state = 'P'
 			sender_state.save()
 		else:
-			pdf_url = message_data['attachments']['payload']['url']
+			pdf_url = message_data['attachments'][0]['payload']['url']
 			sender_state = PrintUserState.objects.create(facebook_id = sender_id, state = 'P')
 			sender_print_job = PrintJob.objects.create(facebook_id = sender_id, pdf_url = pdf_url)
 		return NEXT_STATE_RESPONSE['P']
@@ -114,36 +114,43 @@ class PrintView(generic.View):
 		sender_print_job.delete()
 		return NEXT_STATE_RESPONSE['N']
 
-    # POST 2.0
-    def post(self, request, *args, **kwargs):
-        incoming_data = json.loads(self.request.body.decode('utf-8'))
-        for entry in incoming_data['entry']:
-            messaging_data = entry['messaging'][0]
-            if 'message' not in messaging_data:
-                continue
+	# POST 2.0
+	def post(self, request, *args, **kwargs):
+		incoming_data = json.loads(self.request.body.decode('utf-8'))
+		pprint(incoming_data)
+		for entry in incoming_data['entry']:
+			messaging_data = entry['messaging'][0]
+			if 'message' not in messaging_data:
+				return HttpResponse()
 
-            sender_id = messaging_data['sender']['id']
-            try: # should only exist after the user created a print job
-                sender_state = PrintUserState.objects.get(facebook_id = sender_id)
-            except PrintUserState.DoesNotExist:
-                sender_state = None
+			sender_id = messaging_data['sender']['id']
+			try: # should only exist after the user created a print job
+				sender_state = PrintUserState.objects.get(facebook_id = sender_id)
+			except PrintUserState.DoesNotExist:
+				sender_state = None
 
-            message_data = messaging_data['message']
-            if 'attachments' in message_data:
-                response_text = self._handle_pdf(sender_id, message_data)
-            elif not sender_state:
-                response_text = 'Please send a valid PDF.'
-            elif sender_state.state == 'P':
-                response_text = self._handle_kerberos(sender_id, message_data)
-            elif sender_state.state == 'K':
-                response_text = self._handle_sided(sender_id, message_data)
-            elif sender_state.state == 'S':
-                response_text = self._handle_printer_type(sender_id, message_data)
-            else: # sender_state.state == 'T':
-                response_text = self._handle_n_copies(sender_id, message_data)
+			message_data = messaging_data['message']
+			if 'attachments' in message_data:
+				print('attachment handler firing')
+				response_text = self._handle_pdf(sender_id, message_data)
+			elif not sender_state:
+				print('no valid sender state')
+				response_text = 'Hello! To print a PDF: \n1. Open the PDF in Safari\n2. Tap the "forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file to FB messenger with the button in the bottom left. \nIf messenger is not an option, click "more" and add it as an option.'
+			elif sender_state.state == 'P':
+				print('kerb handler')
+				response_text = self._handle_kerberos(sender_id, message_data)
+			elif sender_state.state == 'K':
+				print('sided handler')
+				response_text = self._handle_sided(sender_id, message_data)
+			elif sender_state.state == 'S':
+				print('color handler')
+				response_text = self._handle_printer_type(sender_id, message_data)
+			else: # sender_state.state == 'T':
+				print('copies handler')
+				response_text = self._handle_n_copies(sender_id, message_data)
 
-            post_facebook_message(sender_id, response_text)
-            return HttpResponse()
+			post_facebook_message(sender_id, response_text)
+			return HttpResponse()
 
 def post_facebook_message(recipient_id, received_message):
 	post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44'

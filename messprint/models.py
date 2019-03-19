@@ -27,7 +27,7 @@ USER_STATE = (
 	('N', 'N_COPIES')
 )
 NEXT_STATE_RESPONSE = {
-	'P': 'What\' is your kerberos?',
+	'P': 'What\'s your kerberos?',
 	'K': 'Do you want to print single or double sided?',
 	'S': 'Do you want to print bw or color?',
 	'T': 'How many copies do you want to print? Type a number.',
@@ -36,4 +36,3 @@ NEXT_STATE_RESPONSE = {
 class PrintUserState(models.Model):
 	facebook_id = models.CharField(max_length=128, primary_key=True, unique=True)
 	state = models.CharField(max_length=1, choices=USER_STATE)
-
