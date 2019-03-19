@@ -12,6 +12,7 @@ from messprint.pharos_print import print_file_from_url
 
 # Create your views here
 class PrintView(generic.View):
+
 	@method_decorator(csrf_exempt)
 	def dispatch(self, request, *args, **kwargs):
 		return generic.View.dispatch(self, request, *args, **kwargs)
@@ -113,38 +114,36 @@ class PrintView(generic.View):
 		sender_print_job.delete()
 		return NEXT_STATE_RESPONSE['N']
 
-	# POST 2.0
-	def post(self, request, *args, **kwargs):
-		incoming_data = json.loads(self.request.body.decode('utf-8'))
-		print('incoming data {}'.format(incoming_data))
-		for entry in incoming_data['entry']:
-			print('entry is {}'.format(entry))
-			messaging_data = entry['messaging']
-			if 'message' not in messaging_data:
-				continue
+    # POST 2.0
+    def post(self, request, *args, **kwargs):
+        incoming_data = json.loads(self.request.body.decode('utf-8'))
+        for entry in incoming_data['entry']:
+            messaging_data = entry['messaging'][0]
+            if 'message' not in messaging_data:
+                continue
 
-			sender_id = messaging_data['sender']['id']
-			try: # should only exist after the user created a print job
-				sender_state = PrintUserState.objects.get(facebook_id = sender_id)
-			except PrintUserState.DoesNotExist:
-				pass
+            sender_id = messaging_data['sender']['id']
+            try: # should only exist after the user created a print job
+                sender_state = PrintUserState.objects.get(facebook_id = sender_id)
+            except PrintUserState.DoesNotExist:
+                sender_state = None
 
-			print('message data is {}'.format(message_data))
-			message_data = messaging_data['message']
-			if 'attachments' in message_data:
-				response_text = self._handle_pdf(sender_id, message_data)
-			elif sender_state.state == 'P':
-				response_text = self._handle_kerberos(sender_id, message_data)
-			elif sender_state.state == 'K':
-				response_text = self._handle_sided(sender_id, message_data)
-			elif sender_state.state == 'S':
-				response_text = self._handle_printer_type(sender_id, message_data)
-			else: # the state is 'T'
-				response_text = self._handle_n_copies(sender_id, message_data)
+            message_data = messaging_data['message']
+            if 'attachments' in message_data:
+                response_text = self._handle_pdf(sender_id, message_data)
+            elif not sender_state:
+                response_text = 'Please send a valid PDF.'
+            elif sender_state.state == 'P':
+                response_text = self._handle_kerberos(sender_id, message_data)
+            elif sender_state.state == 'K':
+                response_text = self._handle_sided(sender_id, message_data)
+            elif sender_state.state == 'S':
+                response_text = self._handle_printer_type(sender_id, message_data)
+            else: # sender_state.state == 'T':
+                response_text = self._handle_n_copies(sender_id, message_data)
 
-			post_facebook_message(recipient_id, response_text)
-			return HttpResponse()
-
+            post_facebook_message(sender_id, response_text)
+            return HttpResponse()
 
 def post_facebook_message(recipient_id, received_message):
 	post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44'
