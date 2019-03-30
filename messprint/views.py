@@ -31,17 +31,28 @@ class PrintView(generic.View):
     def _handle_pdf(self, sender_id, message_data):
         sender_state_exists = PrintUserState.objects.filter(
             facebook_id=sender_id).exists()
+        response = ''
+
+        pdf_url = message_data['text']
+        r = requests.get(pdf_url)
+        content_type = r.headers.get('content-type')
+
+        # not a pdf
+        if not 'application/pdf' in content_type:
+            response += 'We only officially support printing PDF files currently. Your file is not a PDF file. Proceeding anyway... (resend a PDF link to restart)\n\n'
+
         if sender_state_exists:  # reset current print job and let the user start with another one
-            sender_state = PrintUserState.objects.get(facebook_id=sender_id)
+            sender_state, sender_print_job = self._fetch_sender_data(sender_id)
             sender_state.state = 'P'
-            sender_state.save()
+            sender_print_job.pdf_url = pdf_url
         else:
-            pdf_url = message_data['text']
             sender_state = PrintUserState.objects.create(
                 facebook_id=sender_id, state='P')
             sender_print_job = PrintJob.objects.create(
                 facebook_id=sender_id, pdf_url=pdf_url)
-        return NEXT_STATE_RESPONSE['P']
+        sender_state.save()
+        sender_print_job.save()
+        return response + NEXT_STATE_RESPONSE['P']
 
     def _fetch_sender_data(self, sender_id):
         sender_state = PrintUserState.objects.get(facebook_id=sender_id)
@@ -95,14 +106,14 @@ class PrintView(generic.View):
         sender_print_job.save()
 
         print('At the end {}'.format(sender_print_job))
-  #   	print_file_from_url(
-  #   		sender_print_job.pdf_url,
-  #   		sender_print_job.kerberos,
-  #   		'mit-print.pdf',
-  #   		color = sender_print_job.printer_type == 'C',
-  #   		double_sided = sender_print_job.sided == 'D',
-  #   		n_copies = sender_print_job.n_copies
-    # )
+        print_file_from_url(
+            sender_print_job.pdf_url,
+            sender_print_job.kerberos,
+            'MIT Mobile Print: ' + sender_print_job.pdf_url,
+            color=sender_print_job.printer_type == 'C',
+            double_sided=sender_print_job.sided == 'D',
+            n_copies=sender_print_job.n_copies
+        )
 
         sender_state.delete()
         sender_print_job.delete()

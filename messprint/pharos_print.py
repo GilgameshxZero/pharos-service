@@ -25,7 +25,7 @@ def print_file_from_url(file_url,
         '-H', 'printers.mit.edu',  # endpoint
         '-P', 'color' if color else 'bw',
         '-U', kerberos,
-        '-#', n_copies,
+        '-#', str(n_copies),
         '-T', file_name,
         '-o', 'sides={}'.format('two-sided-long-edge' if double_sided else 'one-sided')
     ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
