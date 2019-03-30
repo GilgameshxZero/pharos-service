@@ -82,9 +82,17 @@ python manage.py runserver
 This starts the Django server on `localhost:8000`. You may wish to run it in a `tmux` module in the background. In order to make it web accessible, we'll need to tunnel it. For this project, we will use `serveo.net`. This tunnel is easily established by running
 
 ```bash
-ssh pharos-service:80:localhost:8000 serveo.net
+ssh -R pharos-service:80:localhost:8000 serveo.net
 ```
 
-which points `pharos-service.serveo.net` to `localhost:8000`. In order to stop the connection from dropping, it would be helpful to run `autossh` <https://www.harding.motd.ca/autossh/> instead of `ssh`, which you may `wget` into `/mit/[lockername]/Scripts/django/`. The `serveo` tunnel is probably best kept in a `tmux` module as well.
+which points `pharos-service.serveo.net` to `localhost:8000`. If that doesn't work, try replacing `localhost` with `127.0.0.1`. In order to stop the connection from dropping, it would be helpful to run `autossh` <https://www.harding.motd.ca/autossh/> instead of `ssh`, which you may `wget` into `/mit/[lockername]/Scripts/django/`. The `serveo` tunnel is probably best kept in a `tmux` module as well.
 
 Finally, updates to `master` will update the Django server automatically, but still need pulling. Automatic pulling from `athena` with a `tmux` module will fail once the connection expires, and automatic pulling from the `scripts` server is slightly more difficult. For now, updates will need to be manually pulled.
+
+## Developing
+
+During development, you may use the host `pharos-service-test.serveo.net`, with the same `ssh` command above.
+
+## Todo
+
+Currently, static files are not being served in `debug = False`, so `debug = True` is turned on. However, this should be fixed ASAP.

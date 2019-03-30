@@ -24,7 +24,7 @@ SECRET_KEY = '$g@a(933hh5etgta9yyzg65dbv+2(ge84!%*s%ql4y91f4=)(a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     # local hosts
@@ -36,8 +36,8 @@ ALLOWED_HOSTS = [
     'twang6.scripts.mit.edu',
     'jinglin.scripts.mit.edu',
     # remote hosts
-    'pharos-service.serveo.net',  # preferred
-    'd0a69e39.ngrok.io'
+    'pharos-service.serveo.net',
+    'pharos-service-test.serveo.net'
 ]
 
 # EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44
@@ -132,4 +132,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
+
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]

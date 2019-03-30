@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 from pprint import pprint
 
@@ -13,10 +14,6 @@ from messprint.pharos_print import print_file_from_url
 
 # Create your views here
 
-def index_view_get(request):
-    print(request.GET)
-    return HttpResponse('Welcome to pharos-service! You probably want to head to /messprint/66d2b8f4a09cd35cb23076a1da5d51529136a3373fd570b122')
-
 
 class PrintView(generic.View):
 
@@ -29,28 +26,9 @@ class PrintView(generic.View):
         if self.request.GET.get('hub.verify_token') == '2318934571':
             return HttpResponse(self.request.GET['hub.challenge'])
         else:
-            return HttpResponse('Hello World')
-
-    # # POST function to handle Facebook messages
-    # def post(self, request, *args, **kwargs):
-    #     # Converts the text payload into a python dictionary
-    #     incoming_message = json.loads(self.request.body.decode('utf-8'))
-    #     # Facebook recommends going through every entry since they might send
-    #     # multiple messages in a single call during high load
-    #     for entry in incoming_message['entry']:
-    #         for message in entry['messaging']:
-    #             # Check to make sure the received call is a message call
-    #             # This might be delivery, optin, postback for other events
-    #             if 'message' in message:
-    #                 # Print the message to the terminal
-    #                 pprint(message)
-    #                 post_facebook_message(message['sender']['id'], message['message']['text'])
-    #     return HttpResponse()
+            return HttpResponse('Hello world!')
 
     def _handle_pdf(self, sender_id, message_data):
-        if message_data['attachments'][0]['type'] != 'file':
-            return 'Sorry. We only support printing files. :/'
-
         sender_state_exists = PrintUserState.objects.filter(
             facebook_id=sender_id).exists()
         if sender_state_exists:  # reset current print job and let the user start with another one
@@ -58,7 +36,7 @@ class PrintView(generic.View):
             sender_state.state = 'P'
             sender_state.save()
         else:
-            pdf_url = message_data['attachments'][0]['payload']['url']
+            pdf_url = message_data['text']
             sender_state = PrintUserState.objects.create(
                 facebook_id=sender_id, state='P')
             sender_print_job = PrintJob.objects.create(
@@ -82,6 +60,9 @@ class PrintView(generic.View):
     def _handle_sided(self, sender_id, message_data):
         sender_state, sender_print_job = self._fetch_sender_data(sender_id)
 
+        if message_data['text'] != 'single' and message_data['text'] != 'double':
+            return 'Please type \'single\' or \'double\'.'
+
         sender_state.state = 'S'
         sender_print_job.sided = 'S' if message_data['text'] == 'single' else 'D'
         sender_state.save()
@@ -91,8 +72,11 @@ class PrintView(generic.View):
     def _handle_printer_type(self, sender_id, message_data):
         sender_state, sender_print_job = self._fetch_sender_data(sender_id)
 
+        if message_data['text'] != 'bw' and message_data['text'] != 'color':
+            return 'Please type \'bw\' or \'color\'.'
+
         sender_state.state = 'T'
-        sender_print_job.printer_type = 'B' if message_data['text'] == 'bw' else 'C'
+        sender_print_job.printer_type = 'C' if message_data['text'] == 'color' else 'B'
         sender_state.save()
         sender_print_job.save()
         return NEXT_STATE_RESPONSE['T']
@@ -103,7 +87,7 @@ class PrintView(generic.View):
         try:
             n_copies = int(message_data['text'])
         except ValueError:
-            return 'Please insert a valid number of copies'
+            return 'Please input a valid number (of copies).'
 
         sender_state.state = 'N'
         sender_print_job.n_copies = n_copies
@@ -141,12 +125,12 @@ class PrintView(generic.View):
                 sender_state = None
 
             message_data = messaging_data['message']
-            if 'attachments' in message_data:
+            if re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text']):
                 print('attachment handler firing')
                 response_text = self._handle_pdf(sender_id, message_data)
             elif not sender_state:
                 print('no valid sender state')
-                response_text = 'Hello! To print a PDF: \n1. Open the PDF in Safari\n2. Tap the "forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file to FB messenger with the button in the bottom left. \nIf messenger is not an option, click "more" and add it as an option.'
+                response_text = 'iOS: Paste a link to a PDF to get started.\n\nTo print a PDF in blocked behind Stellar:\n1. Open the PDF in Safari (in Chrome, simply tap the PDF, select "Open In..." and skip to step 4)\n2. Tap the "Forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file with yourself in Facebook Messenger with the button in the bottom left (if messenger is not an option, click "more" and add it as an option).\n5. In Messenger, click the file you sent to yourself to open it and copy its link using the top-right button.\n6. Paste the link here!'
             elif sender_state.state == 'P':
                 print('kerb handler')
                 response_text = self._handle_kerberos(sender_id, message_data)

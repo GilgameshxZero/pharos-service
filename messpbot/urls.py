@@ -15,12 +15,28 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
-import messprint.views
-from messprint.views import index_view_get
+from django.views.generic.base import RedirectView
+from django.http import HttpResponse
+
+# Create your views here
+
+
+def default_get(request):
+    print(request.GET)
+    return HttpResponse('Welcome to pharos-service! You probably want to head to /messprint/66d2b8f4a09cd35cb23076a1da5d51529136a3373fd570b122')
+
 
 urlpatterns = [
-    url(r'^/', index_view_get),
+    url(r'^$', default_get),
+    url(r'^favicon.ico', RedirectView.as_view(
+        url='/static/favicon.ico', permanent=True)),
+    url(r'^privacy-policy.html', RedirectView.as_view(
+        url='/static/privacy-policy.html', permanent=True)),
+    url(r'^terms-of-service.html', RedirectView.as_view(
+        url='/static/terms-of-service.html', permanent=True)),
     url(r'^admin/', admin.site.urls),
     # url('print/', messprint.views.PrintView),
     url(r'^messprint/', include('messprint.urls')),

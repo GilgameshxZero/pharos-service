@@ -32,8 +32,8 @@ USER_STATE = (
 )
 NEXT_STATE_RESPONSE = {
     'P': 'What\'s your kerberos?',
-    'K': 'Do you want to print single or double sided?',
-    'S': 'Do you want to print bw or color?',
+    'K': 'Do you want to print \'single\' or \'double\' sided?',
+    'S': 'Do you want to print \'bw\' or color\'?',
     'T': 'How many copies do you want to print? Type a number.',
     'N': 'We\'ve sent your order to the printer!'
 }
