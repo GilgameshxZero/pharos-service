@@ -29,7 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'yangilga.scripts.mit.edu',
-    'stelay.scripts.mit.edu',
+    'stellay.scripts.mit.edu',
     'twang6.scripts.mit.edu',
     'jinglin.scripts.mit.edu',
     '127.0.0.1',

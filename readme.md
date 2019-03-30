@@ -35,7 +35,7 @@ Head back to Athena, and run
 scripts
 ```
 
-Follow the instructions to install Django for your script. Set the path to `messengerpbot` and the project to `messpbot`.
+Follow the instructions to install Django for your script (Quick-Start autoinstall > Django > personal Athena account > your username and password). Set the "desired address" to `messengerpbot` and the project to `messpbot`.
 
 Open `/mit/[lockername]/web_scripts/[path]/index.fcgi` and after
 
