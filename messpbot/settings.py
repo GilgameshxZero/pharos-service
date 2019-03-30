@@ -25,7 +25,7 @@ SECRET_KEY = '$g@a(933hh5etgta9yyzg65dbv+2(ge84!%*s%ql4y91f4=)(a'
 # SECURITY WARNING: don't run with debug turned on in production!
 import os
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'yangilga.scripts.mit.edu',
