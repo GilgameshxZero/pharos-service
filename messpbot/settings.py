@@ -23,20 +23,24 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '$g@a(933hh5etgta9yyzg65dbv+2(ge84!%*s%ql4y91f4=)(a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-import os
 
 DEBUG = False
 
 ALLOWED_HOSTS = [
+    # local hosts
+    '127.0.0.1',
+    'localhost',
+    # dev hosts
     'yangilga.scripts.mit.edu',
     'stellay.scripts.mit.edu',
     'twang6.scripts.mit.edu',
     'jinglin.scripts.mit.edu',
-    '127.0.0.1',
+    # remote hosts
+    'pharos-service.serveo.net',  # preferred
     'd0a69e39.ngrok.io'
 ]
 
-#EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44
+# EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44
 
 # Application definition
 
