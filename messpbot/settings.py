@@ -32,7 +32,7 @@ ALLOWED_HOSTS = [
     'localhost',
     # dev hosts
     'yangilga.scripts.mit.edu',
-    'stelay.scripts.mit.edu',
+    'stellay.scripts.mit.edu',
     'twang6.scripts.mit.edu',
     'jinglin.scripts.mit.edu',
     # remote hosts
