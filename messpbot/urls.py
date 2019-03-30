@@ -17,9 +17,11 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 import messprint.views
+from messprint.views import index_view_get
 
 urlpatterns = [
-   url(r'^admin/', admin.site.urls),
-   # url('print/', messprint.views.PrintView),
-   url(r'^messprint/', include('messprint.urls')),
+    url(r'^/', index_view_get),
+    url(r'^admin/', admin.site.urls),
+    # url('print/', messprint.views.PrintView),
+    url(r'^messprint/', include('messprint.urls')),
 ]

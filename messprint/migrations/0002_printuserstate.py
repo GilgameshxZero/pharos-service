@@ -13,8 +13,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PrintUserState',
             fields=[
-                ('facebook_id', models.CharField(max_length=128, primary_key=True, serialize=False, unique=True)),
-                ('state', models.CharField(choices=[('P', 'PDF'), ('K', 'KERBEROS'), ('S', 'SIDED'), ('T', 'PRINTER_TYPE'), ('N', 'N_COPIES')], max_length=1)),
+                ('facebook_id', models.CharField(max_length=128,
+                                                 primary_key=True, serialize=False, unique=True)),
+                ('state', models.CharField(choices=[('P', 'PDF'), ('K', 'KERBEROS'), (
+                    'S', 'SIDED'), ('T', 'PRINTER_TYPE'), ('N', 'N_COPIES')], max_length=1)),
             ],
         ),
     ]
