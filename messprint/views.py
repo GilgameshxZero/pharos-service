@@ -32,14 +32,19 @@ class PrintView(generic.View):
         sender_state_exists = PrintUserState.objects.filter(
             facebook_id=sender_id).exists()
         response = ''
+        pdf_url = ''
 
-        pdf_url = message_data['text']
-        r = requests.get(pdf_url)
-        content_type = r.headers.get('content-type')
+        if 'text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text']):
+            pdf_url = message_data['text']
+            r = requests.get(pdf_url)
+            content_type = r.headers.get('content-type')
 
-        # not a pdf
-        if not 'application/pdf' in content_type:
-            response += 'We only officially support printing PDF files currently. Your file is not a PDF file. Proceeding anyway... (resend a PDF link to restart)\n\n'
+            # not a pdf
+            if not 'application/pdf' in content_type:
+                response += 'We only officially support printing PDF files currently. We\'ll try our best; proceeding anyway... (resend a PDF link to restart)\n\n'
+        else:
+            pdf_url = message_data['attachments'][0]['payload']['url']
+            response += 'We only officially support printing from URL currently. We\'ll try our best; proceeding anyway...\n\n'
 
         if sender_state_exists:  # reset current print job and let the user start with another one
             sender_state, sender_print_job = self._fetch_sender_data(sender_id)
@@ -124,39 +129,46 @@ class PrintView(generic.View):
         incoming_data = json.loads(self.request.body.decode('utf-8'))
         pprint(incoming_data)
         for entry in incoming_data['entry']:
-            messaging_data = entry['messaging'][0]
-            if 'message' not in messaging_data:
-                return HttpResponse()
+            try:
+                messaging_data = entry['messaging'][0]
+                if 'message' not in messaging_data:
+                    return HttpResponse()
 
-            sender_id = messaging_data['sender']['id']
-            try:  # should only exist after the user created a print job
-                sender_state = PrintUserState.objects.get(
-                    facebook_id=sender_id)
-            except PrintUserState.DoesNotExist:
-                sender_state = None
+                sender_id = messaging_data['sender']['id']
+                try:  # should only exist after the user created a print job
+                    sender_state = PrintUserState.objects.get(
+                        facebook_id=sender_id)
+                except PrintUserState.DoesNotExist:
+                    sender_state = None
 
-            message_data = messaging_data['message']
-            if re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text']):
-                print('attachment handler firing')
-                response_text = self._handle_pdf(sender_id, message_data)
-            elif not sender_state:
-                print('no valid sender state')
-                response_text = 'iOS: Paste a link to a PDF to get started.\n\nTo print a PDF in blocked behind Stellar:\n1. Open the PDF in Safari (in Chrome, simply tap the PDF, select "Open In..." and skip to step 4)\n2. Tap the "Forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file with yourself in Facebook Messenger with the button in the bottom left (if messenger is not an option, click "more" and add it as an option).\n5. In Messenger, click the file you sent to yourself to open it and copy its link using the top-right button.\n6. Paste the link here!'
-            elif sender_state.state == 'P':
-                print('kerb handler')
-                response_text = self._handle_kerberos(sender_id, message_data)
-            elif sender_state.state == 'K':
-                print('sided handler')
-                response_text = self._handle_sided(sender_id, message_data)
-            elif sender_state.state == 'S':
-                print('color handler')
-                response_text = self._handle_printer_type(
-                    sender_id, message_data)
-            else:  # sender_state.state == 'T':
-                print('copies handler')
-                response_text = self._handle_n_copies(sender_id, message_data)
+                message_data = messaging_data['message']
+                if ('text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text'])) or 'attachments' in message_data:
+                    print('attachment handler firing')
+                    response_text = self._handle_pdf(sender_id, message_data)
+                elif not sender_state:
+                    print('no valid sender state')
+                    response_text = 'iOS: Paste a link to a PDF to get started.\n\nTo print a PDF in blocked behind Stellar:\n1. Open the PDF in Safari (in Chrome, simply tap the PDF, select "Open In..." and skip to step 4)\n2. Tap the "Forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file with yourself in Facebook Messenger with the button in the bottom left (if messenger is not an option, click "more" and add it as an option).\n5. In Messenger, click the file you sent to yourself to open it and copy its link using the top-right button.\n6. Paste the link here!'
+                elif sender_state.state == 'P':
+                    print('kerb handler')
+                    response_text = self._handle_kerberos(
+                        sender_id, message_data)
+                elif sender_state.state == 'K':
+                    print('sided handler')
+                    response_text = self._handle_sided(sender_id, message_data)
+                elif sender_state.state == 'S':
+                    print('color handler')
+                    response_text = self._handle_printer_type(
+                        sender_id, message_data)
+                else:  # sender_state.state == 'T':
+                    print('copies handler')
+                    response_text = self._handle_n_copies(
+                        sender_id, message_data)
 
-            post_facebook_message(sender_id, response_text)
+                post_facebook_message(sender_id, response_text)
+            except:
+                post_facebook_message(
+                    sender_id, 'Error while processing message.')
+                print('error while processing message')
             return HttpResponse()
 
 
