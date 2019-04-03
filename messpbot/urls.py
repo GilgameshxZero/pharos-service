@@ -26,7 +26,7 @@ from django.http import HttpResponse
 
 def default_get(request):
     print(request.GET)
-    return HttpResponse('Welcome to pharos-service! You probably want to head to /messprint/66d2b8f4a09cd35cb23076a1da5d51529136a3373fd570b122')
+    return HttpResponse('Welcome to pharos-service! You probably want to head to /messprint/66d2b8f4a09cd35cb23076a1da5d51529136a3373fd570b122\n\nMade by Yang Yan, Stella Yang, Tony Wang, and Jing Lin')
 
 
 urlpatterns = [
