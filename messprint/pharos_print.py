@@ -21,7 +21,7 @@ def print_file_from_url(file_url,
 
     lpr = Popen([
         'lpr',
-        '-l',  # send without formatting
+        #'-l',  # send without formatting
         '-H', 'printers.mit.edu',  # endpoint
         '-P', 'color' if color else 'bw',
         '-U', kerberos,
