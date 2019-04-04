@@ -18,8 +18,7 @@ def print_file_from_url(file_url,
     )
     """
     r = requests.get(file_url)
-
-    lpr = Popen([
+    options = [
         'lpr',
         # '-l',  # send without formatting
         '-H', 'printers.mit.edu',  # endpoint
@@ -28,7 +27,15 @@ def print_file_from_url(file_url,
         '-#', str(n_copies),
         '-T', file_name,
         '-o', 'sides={}'.format('two-sided-long-edge' if double_sided else 'one-sided')
-    ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    ]
+
+    # if file is an image, add the fit-to-page option
+    # TODO: add more options for images
+    content_type = r.headers.get('content-type')
+    if content_type.startswith('image/'):
+        options.append(['-o', 'fit-to-page'])
+
+    lpr = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     lpr_out = lpr.communicate(input=r.content)
 
     return lpr_out
