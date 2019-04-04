@@ -36,15 +36,15 @@ class PrintView(generic.View):
 
         if 'text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text']):
             pdf_url = message_data['text']
-            r = requests.get(pdf_url)
-            content_type = r.headers.get('content-type')
-
-            # not a pdf
-            if not 'application/pdf' in content_type:
-                response += 'We only officially support printing PDF files currently. We\'ll try our best; proceeding anyway... (resend a PDF link to restart)\n\n'
         else:
             pdf_url = message_data['attachments'][0]['payload']['url']
-            response += 'We only officially support printing from URL currently. We\'ll try our best; proceeding anyway...\n\n'
+
+        r = requests.get(pdf_url)
+        content_type = r.headers.get('content-type')
+
+        # not a pdf
+        if not 'application/pdf' in content_type:
+            response += 'We don\'t officially support printing this file format (non-PDF). However, we\'ll try our best anyway ^_^\n\n'
 
         if sender_state_exists:  # reset current print job and let the user start with another one
             sender_state, sender_print_job = self._fetch_sender_data(sender_id)
@@ -77,7 +77,7 @@ class PrintView(generic.View):
         sender_state, sender_print_job = self._fetch_sender_data(sender_id)
 
         if message_data['text'] != 'single' and message_data['text'] != 'double':
-            return 'Please type \'single\' or \'double\'.'
+            return 'Please type "single" or "double".'
 
         sender_state.state = 'S'
         sender_print_job.sided = 'S' if message_data['text'] == 'single' else 'D'
@@ -89,7 +89,7 @@ class PrintView(generic.View):
         sender_state, sender_print_job = self._fetch_sender_data(sender_id)
 
         if message_data['text'] != 'bw' and message_data['text'] != 'color':
-            return 'Please type \'bw\' or \'color\'.'
+            return 'Please type "bw" or "color".'
 
         sender_state.state = 'T'
         sender_print_job.printer_type = 'C' if message_data['text'] == 'color' else 'B'
@@ -103,7 +103,7 @@ class PrintView(generic.View):
         try:
             n_copies = int(message_data['text'])
         except ValueError:
-            return 'Please input a valid number (of copies).'
+            return 'Please input a valid integer (of copies).'
 
         sender_state.state = 'N'
         sender_print_job.n_copies = n_copies
@@ -114,7 +114,7 @@ class PrintView(generic.View):
         print_file_from_url(
             sender_print_job.pdf_url,
             sender_print_job.kerberos,
-            'MIT Mobile Print: ' + sender_print_job.pdf_url,
+            '[MIT Mobile Print] ' + sender_print_job.pdf_url.split('/')[-1],
             color=sender_print_job.printer_type == 'C',
             double_sided=sender_print_job.sided == 'D',
             n_copies=sender_print_job.n_copies
@@ -142,12 +142,16 @@ class PrintView(generic.View):
                     sender_state = None
 
                 message_data = messaging_data['message']
-                if ('text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text'])) or 'attachments' in message_data:
+                if 'text' in message_data and message_data['text'] is "ios":
+                    response_text = 'On iOS, to print a PDF blocked behind Stellar:\n1. Open the PDF in Safari (in Chrome, simply tap the PDF, select "Open In..." and skip to step 4)\n2. Tap the "Forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file with yourself in Facebook Messenger with the button in the bottom left (if messenger is not an option, click "more" and add it as an option).\n5. In Messenger, click the file you sent to yourself to open it and copy its link using the top-right button.\n6. Paste the link here!\n\nWe don\'t officially support printing file formats other than PDF, but you may still send such a file, and we\'ll try our best.'
+                elif 'text' in message_data and message_data['text'] is "andriod":
+                    response_text = 'On Andriod, there is no built-in way to print using MIT Mobile Print. However, if you\'re able to generate a web-accessible link to the PDF, pasting the link here will work.\n\nWe don\'t officially support printing file formats other than PDF, but you may still send such a file, and we\'ll try our best.'
+                elif ('text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text'])) or 'attachments' in message_data:
                     print('attachment handler firing')
                     response_text = self._handle_pdf(sender_id, message_data)
                 elif not sender_state:
                     print('no valid sender state')
-                    response_text = 'iOS: Paste a link to a PDF to get started.\n\nTo print a PDF in blocked behind Stellar:\n1. Open the PDF in Safari (in Chrome, simply tap the PDF, select "Open In..." and skip to step 4)\n2. Tap the "Forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file with yourself in Facebook Messenger with the button in the bottom left (if messenger is not an option, click "more" and add it as an option).\n5. In Messenger, click the file you sent to yourself to open it and copy its link using the top-right button.\n6. Paste the link here!'
+                    response_text = 'Paste a PDF link or attach a PDF file to get started.\n\nFor further instructions, message "ios" or "android".'
                 elif sender_state.state == 'P':
                     print('kerb handler')
                     response_text = self._handle_kerberos(

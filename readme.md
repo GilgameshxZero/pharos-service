@@ -99,6 +99,4 @@ Finally, updates to `master` will update the Django server automatically, but st
 
 During development, you may use the host `pharos-service-test.serveo.net`, with the same `ssh` command above.
 
-## Todo
-
-Currently, static files are not being served in `debug = False`, so `debug = True` is turned on. However, this should be fixed ASAP.
+This is probably useful: <https://www.cups.org/doc/options.html>.
