@@ -33,7 +33,7 @@ def print_file_from_url(file_url,
     # TODO: add more options for images
     content_type = r.headers.get('content-type')
     if content_type.startswith('image/'):
-        options.append(['-o', 'fit-to-page'])
+        options.extend(['-o', 'fit-to-page'])
 
     lpr = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     lpr_out = lpr.communicate(input=r.content)
