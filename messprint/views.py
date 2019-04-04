@@ -144,8 +144,10 @@ class PrintView(generic.View):
                 message_data = messaging_data['message']
                 if 'text' in message_data and message_data['text'] == "ios":
                     response_text = 'On iOS, to print a PDF blocked behind Stellar:\n1. Open the PDF in Safari (in Chrome, simply tap the PDF, select "Open In..." and skip to step 4)\n2. Tap the "Forward" button\n3. Scroll right in the bottom row and click "Create PDF"\n4. Share the file with yourself in Facebook Messenger with the button in the bottom left (if messenger is not an option, click "more" and add it as an option).\n5. In Messenger, click the file you sent to yourself to open it and copy its link using the top-right button.\n6. Paste the link here!\n\nWe don\'t officially support printing file formats other than PDF, but you may still send such a file, and we\'ll try our best.'
-                elif 'text' in message_data and message_data['text'] == "andriod":
-                    response_text = 'On Andriod, there is no built-in way to print using MIT Mobile Print. However, if you\'re able to generate a web-accessible link to the PDF, pasting the link here will work.\n\nWe don\'t officially support printing file formats other than PDF, but you may still send such a file, and we\'ll try our best.'
+                elif 'text' in message_data and message_data['text'] == "android":
+                    response_text = 'On Android, there is no built-in way to print using MIT Mobile Print. However, if you\'re able to generate a web-accessible link to the PDF, pasting the link here will work.\n\nWe don\'t officially support printing file formats other than PDF, but you may still send such a file, and we\'ll try our best.'
+                elif 'text' in message_data and message_data['text'] == "u up?":
+                    response_text = "ye bby ;)"
                 elif ('text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text'])) or 'attachments' in message_data:
                     print('attachment handler firing')
                     response_text = self._handle_pdf(sender_id, message_data)
