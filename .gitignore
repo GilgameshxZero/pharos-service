@@ -1,1 +1,8 @@
+**/__pycache__/
+
+**.pyc
+
+/static_collected/
+
+db.sqlite3
 .python-version
