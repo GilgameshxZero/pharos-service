@@ -1,6 +1,7 @@
 import json
 import re
 import requests
+import traceback
 from pprint import pprint
 
 from django.shortcuts import render
@@ -173,7 +174,7 @@ class PrintView(generic.View):
                 post_facebook_message(sender_id, response_text)
             except:
                 post_facebook_message(
-                    sender_id, 'Error while processing message.')
+                    sender_id, traceback.format_exc() + '\n\nError while processing message.')
                 print('error while processing message')
             return HttpResponse()
 
