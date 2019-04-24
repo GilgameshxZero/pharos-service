@@ -31,13 +31,7 @@ def default_get(request):
 
 urlpatterns = [
     url(r'^$', default_get),
-    url(r'^favicon.ico', RedirectView.as_view(
-        url='/static/favicon.ico', permanent=True)),
-    url(r'^privacy-policy.html', RedirectView.as_view(
-        url='/static/privacy-policy.html', permanent=True)),
-    url(r'^terms-of-service.html', RedirectView.as_view(
-        url='/static/terms-of-service.html', permanent=True)),
     url(r'^admin/', admin.site.urls),
-    # url('print/', messprint.views.PrintView),
     url(r'^messprint/', include('messprint.urls')),
 ]
+
