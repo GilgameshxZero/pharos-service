@@ -34,6 +34,7 @@ Then, `ssh` into the scripts server:
 ```bash
 ssh -k [lockername]@scripts
 pip install --user --upgrade django==1.10.5
+pip install whitenoise
 python -c "import django; print(django.get_version())" # should print 1.10.5
 ```
 
