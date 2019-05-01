@@ -10,7 +10,7 @@ We support the printing of PDFs on iOS through Messenger. The options are:
 
 * Sides: one or two-sided
 * Color: black/white or color
-* Copies: number of copies of PDF
+* Copies: number of copies
 
 ## File organization
 
