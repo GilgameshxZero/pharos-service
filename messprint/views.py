@@ -180,7 +180,7 @@ class PrintView(generic.View):
 
 
 def post_facebook_message(recipient_id, received_message):
-    post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAHAxr1y4u0BAFMTj3WsZCe9xjca9E3wO4K2Dj8JQpN1FghKWTZBmFwbgcpz0IWiG0G5XsoHfHwysQBcKZB3nVYJ6kC7JQm0oq5iqQLPA13AZBe97bsJi9UKxZAzE9LMRSb1ZA78zVAx9E6nminB8nZBAoIHpZBhoZCR9QSOdvRWzbviogqA0hV44'
+    post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAgpqHAwqY8BACreOGTeMOwcNLU9lmtBSrgZAR4PFImCwBMY9KRYMqt7SJrxjQC1TETPz0R331ilyOLdW62dsg7ulJfw3rBmiID6AAaFOYoNsZBBUgCKkK1O9KWQ0YjVNjPA91WcSyQF1IQnMlCHjkxvD5ReudoV03bSZArb4bdZAf7qtWFdRBnsH6oV05IZD'
     response_msg = json.dumps(
         {"recipient": {"id": recipient_id}, "message": {"text": received_message}})
     status = requests.post(post_message_url, headers={
