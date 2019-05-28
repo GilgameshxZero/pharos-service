@@ -13,9 +13,6 @@ from django.views.decorators.csrf import csrf_exempt
 from messprint.models import PrintJob, PrintUserState, NEXT_STATE_RESPONSE
 from messprint.pharos_print import print_file_from_url
 
-# Create your views here
-
-
 class PrintView(generic.View):
 
     @method_decorator(csrf_exempt)
@@ -29,16 +26,23 @@ class PrintView(generic.View):
         else:
             return HttpResponse('Hello world!')
 
+    def get_pdf_url(self, message_data):
+        URL_PAT = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        if 'text' in message_data and re.match(URL_PAT, message_data['text']):
+            return message_data['text']
+
+        if 'attachments' in message_data:
+            for attachment in message_data['attachments']:
+                if attachment['type'] in ['file', 'image']:
+                    return attachment['payload']['url']
+
+        return None
+
     def _handle_pdf(self, sender_id, message_data):
         sender_state_exists = PrintUserState.objects.filter(
             facebook_id=sender_id).exists()
         response = ''
-        pdf_url = ''
-
-        if 'text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text']):
-            pdf_url = message_data['text']
-        else:
-            pdf_url = message_data['attachments'][0]['payload']['url']
+        pdf_url = self.get_pdf_url(message_data)
 
         r = requests.get(pdf_url)
         content_type = r.headers.get('content-type')
@@ -149,7 +153,7 @@ class PrintView(generic.View):
                     response_text = 'On Android, there is no built-in way to print using MIT Mobile Print. However, if you\'re able to generate a web-accessible link to the PDF, pasting the link here will work.\n\nWe don\'t officially support printing file formats other than PDF, but you may still send such a file, and we\'ll try our best.'
                 elif 'text' in message_data and message_data['text'] == "u up?":
                     response_text = "ye bby ;)"
-                elif ('text' in message_data and re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message_data['text'])) or 'attachments' in message_data:
+                elif self.get_pdf_url(message_data) is not None:
                     print('attachment handler firing')
                     response_text = self._handle_pdf(sender_id, message_data)
                 elif not sender_state:
